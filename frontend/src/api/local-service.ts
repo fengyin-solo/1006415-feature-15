@@ -28,6 +28,11 @@ export function listEntries(key: string, filters: Record<string, string> = {}): 
   return { items: matched, total: matched.length, page: 1, size: matched.length }
 }
 
+// 详情与列表读同一份落地数据：都从这里出，不另开副本。
+export function getEntry(key: string, id: number): EntryRow | undefined {
+  return listRows(key).find((row) => Number(row.id) === id)
+}
+
 export function runAction(key: string, id: number, action: string): ActionResult {
   const meta = moduleMeta(key)
   const target = meta.actionTargets[action]
@@ -43,12 +48,15 @@ export function runAction(key: string, id: number, action: string): ActionResult
   if (current === target) {
     return { ok: false, message: `${meta.entity}已经是「${target}」，不用重复操作` }
   }
-  const lastStatus = meta.statuses[meta.statuses.length - 1]
+  // 状态约定与种子数据一致：倒数第二个状态是办结态（不再待处理），最后一个是异常终结态。
+  const doneStatus = meta.statuses[meta.statuses.length - 2]
+  const badStatus = meta.statuses[meta.statuses.length - 1]
   const updated: EntryRow = {
     ...rows[index],
     status: target,
-    pending: target !== lastStatus,
-    abnormal: NEGATIVE_ACTIONS.some((verb) => action.startsWith(verb)),
+    pending: target !== doneStatus,
+    abnormal:
+      target === badStatus || NEGATIVE_ACTIONS.some((verb) => action.startsWith(verb)),
   }
   const next = [...rows]
   next[index] = updated

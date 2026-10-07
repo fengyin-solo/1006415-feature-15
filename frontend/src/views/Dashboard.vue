@@ -15,6 +15,12 @@
         <strong class="stat-value">{{ card.value }}</strong>
       </article>
     </div>
+    <div class="stat-row">
+      <article v-for="item in leachateMetrics" :key="item.label" class="stat-card">
+        <span class="stat-label">渗滤液 · {{ item.label }}</span>
+        <strong class="stat-value">{{ item.value }}</strong>
+      </article>
+    </div>
     <table class="data-table">
       <thead>
         <tr><th>业务模块</th><th>今日新增</th><th>待处理</th><th>异常量</th></tr>
@@ -38,15 +44,20 @@
 import { onMounted, ref } from 'vue'
 
 import { loadOverview } from '@/api/local-service'
+import { leachateStats } from '@/api/leachate-service'
+import type { LeachateStat } from '@/api/leachate-service'
 import type { OverviewResult } from '@/data/types'
 
 const cards = ref<OverviewResult['cards']>([])
 const moduleRows = ref<OverviewResult['modules']>([])
+// 渗滤液的待处理水量等关键指标跟着落地数据现算，不停在旧数上。
+const leachateMetrics = ref<LeachateStat[]>([])
 
 function refresh() {
   const payload = loadOverview()
   cards.value = payload.cards
   moduleRows.value = payload.modules
+  leachateMetrics.value = leachateStats()
 }
 
 onMounted(refresh)

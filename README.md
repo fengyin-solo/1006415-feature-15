@@ -64,7 +64,8 @@ npm run build
 ## 约定
 
 - 每个模块的页面在 `frontend/src/views/<模块>/index.vue`，页面只负责渲染，读写统一走
-  `frontend/src/api/local-service.ts`。
+  `frontend/src/api/local-service.ts`；渗滤液处理的登记、限值判定与达标同步收敛在
+  `frontend/src/api/leachate-service.ts`。
 - 字段、状态、动作与流转目标集中在 `frontend/src/data/modules.ts`；示例数据在
   `frontend/src/data/seed.ts`。
 - 状态流转只允许在 `local-service.ts` 里改，页面组件不做业务判断。
